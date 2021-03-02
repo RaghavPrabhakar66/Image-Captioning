@@ -1,33 +1,32 @@
 import os
 import pandas as pd
-from tqdm import tqdm
+from tqdm import trange, tqdm
+from time import sleep
 
-from old_utils import Vocab
+from utils import VocabBuilder
 
-vocab = Vocab()
-vocab.set_min_count(3)
+vocab = VocabBuilder(min_count=2, json_path='data/vocab.json')
 
 # loop over the captions file and create a dataframe
 # with image and its corresponding captions
 file_path = os.path.abspath("data\captions.txt")
 
 dict_img_captions = {}
-with open(file_path) as cap_file:
-    for i, line in tqdm(cap_file):
+with open(file_path) as (cap_file):
+    for i, line in enumerate(tqdm(cap_file)):
         if i == 0:
-            # skip file header line
-            continue
+            continue    # skip file header line
 
         img, cap = line.strip().split(",", 1)  # split the line on 1st comma
-        caption = vocab.create_vocab(cap, add_to_vocab=True)
+        caption = vocab.add_to_vocab(cap)
         if img in dict_img_captions:
             # image already in the dictionary
             dict_img_captions[img].append(cap)
         else:
             # add new image to dict
             dict_img_captions[img] = [cap]
-        # break
-print('Maximum caption length: ', vocab.MAX_LEN)
+
+print('Maximum caption length : ', vocab.MAX_LEN)
 vocab.store_json()
 
 # create a dataframe from the dict
