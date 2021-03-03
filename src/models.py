@@ -71,38 +71,49 @@ class Decoder(Module):
         self.hidden_size = hidden_size
 
         self.embed = Embedding(self.vocab_size, self.embed_size)
-        self.rnn   = LSTM(input_size=self.embed_size, hidden_size=self.hidden_size, num_layers=lstm_cells, batch_first=True, dropout=lstm_dropout)
+        self.lstm   = LSTM(input_size=self.embed_size, hidden_size=self.hidden_size, num_layers=lstm_cells, batch_first=True, dropout=lstm_dropout)
         self.fc1   = Linear(self.hidden_size, self.vocab_size)
 
     def init_hidden_state(self):
         x = torch.zeros(self.hidden_size)
 
+        return x
+
     def forward(self, img_features, caption):
         embeddings = self.embed(caption)
-
         embeddings = torch.cat((img_features.unsqueeze(0), embeddings), dim=0)
-
-        output, _ = self.rnn(embeddings)
+        output, _ = self.lstm(embeddings)
         outputs = self.fc1(output)
 
         return outputs
 
-class Model(nn.Module):
-    def __init__(self, embed_size, hidden_size, vocab_size, rnn_units, dropout):
+class Model(Module):
+    def __init__(self, backbone, embed_size, hidden_size, vocab_size, lstm_cells, lstm_dropout):
         super(Model, self).__init__()
 
         self.embed_size = embed_size
         self.hidden_size = hidden_size
         self.vocab_size = vocab_size
-        self.num_rnn = rnn_units
-        self.dropout = dropout
+        self.num_rnn = lstm_cells
+        self.dropout = lstm_dropout
 
-        self.encoder = Encoder(embedding_size=self.embed_size)
+        self.encoder = Encoder(backbone=backbone, embedding_size=self.embed_size)
         self.decoder = Decoder(embedding_size=self.embed_size, 
                             hidden_size=self.hidden_size, 
                             vocab_size=self.vocab_size, 
-                            rnn_cells=self.num_rnn, 
-                            rnn_dropout=self.dropout)
+                            lstm_cells=self.num_rnn, 
+                            lstm_dropout=self.dropout)
+    
+    def forward(self, data):
+        image, caption = data['image'], data['caption']
+        print(caption[:-1])
+        #caption = caption.transpose(0, 1)
+        
+        img_features      = self.encoder(image)
+        caption_predicted = self.decoder(img_features, caption[:-1])
+
+        return caption_predicted
+
 
 if __name__=='__main__':
     en = Encoder('vgg16', 10)

@@ -18,7 +18,7 @@ val, test = train_test_split(val, test_size=0.1, random_state=12)
 
 my_transforms_train = transforms.Compose([
                                             #transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
-                                            transforms.Resize((512, 512)),
+                                            transforms.Resize((224, 224)),
                                             transforms.ToTensor()
     ])
 
@@ -27,11 +27,11 @@ train_set = Flickr8k(df=train,
 
 train_dataloader = DataLoader(train_set, batch_size=1, shuffle=True, num_workers=0)
 
-""" for i_batch, sample_batched in enumerate(train_dataloader):
-    print(i_batch, sample_batched['image'].size(), sample_batched['captions'].size())
-
+for i_batch, sample_batched in enumerate(train_dataloader):
+    print(i_batch, sample_batched['image'].size(), sample_batched['caption'].size())
+    break
     # observe 4th batch and stop.
-    if i_batch == 3:
+    if i_batch == 1:
         for idx, caption_set in enumerate(sample_batched['caption']):
             print(caption_set)
             for caption in caption_set:
@@ -40,15 +40,24 @@ train_dataloader = DataLoader(train_set, batch_size=1, shuffle=True, num_workers
                     #print(vocab.get_word_token(token), end=" ")
                 print()
             show_imgs(sample_batched['image'][idx])
-        break """
+        break
 
-sample_data = train_set.__getitem__(np.random.randint(0, train_set.__len__()))
-image, caption = sample_data['image'], sample_data['caption']
-
-model = Model(embed_size=128, 
+model = Model(
+            backbone='vgg16',
+            embed_size=128, 
             hidden_size=128, 
-            vocab_size=vocab.__len__(), 
-            rnn_units=128, 
-            dropout=0.5)
+            vocab_size=vocab.MAX_INDEX, 
+            lstm_cells=128, 
+            lstm_dropout=0.5)
 
-encoded_features = model.encoder.summary()
+#encoded_features = model.encoder.summary()
+
+prediction = model(sample_batched)
+
+
+"""
+for caption in prediction:
+    for token in caption.tolist():
+        #print(token, end=" ")
+        print(vocab.get_word_token(token), end=" ")
+"""

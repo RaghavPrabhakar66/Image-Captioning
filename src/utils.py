@@ -56,6 +56,7 @@ class Vocab:
         self.index2word = {}
         self.json_dict  = {}
         self.MAX_LEN    = 37
+        self.MAX_INDEX  = 0
         self.vocab_path  = os.path.abspath(r"data\vocab.json")
 
         if os.path.exists(self.vocab_path):
@@ -63,6 +64,7 @@ class Vocab:
                 with open(self.vocab_path, 'r') as f:
                     self.word2index = json.load(f)
                     self.index2word = dict(self.word2index.values(), self.word2index.keys())
+                    self.MAX_INDEX = max(self.word2index.values())
             except:
                 pass
         else:
