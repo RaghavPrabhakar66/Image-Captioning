@@ -4,37 +4,6 @@ from torchsummary import summary
 #from pytorch_model_summary import summary
 import torch.nn as nn
 from torchvision.models import resnet18, vgg16
-
-class Encoder(nn.Module):
-
-    def __init__(self, embedding_size):
-        super(Encoder, self).__init__()
-        self.base_model = None
-        self.embedding_size = embedding_size
-
-    def vgg16_backbone(self):
-        self.base_model = vgg16(pretrained=True)
-        
-        """# save the num of input features for the current fc layer
-        input_features_last_layer = self.classifier.fc.in_features
-
-        # freeze all the layers
-        for p in self.base_model.parameters():
-            p.requires_grad = False
-
-        #replace the fc layer with our own
-        self.base_model.classifier[-1] = nn.Linear(in_features=input_features_last_layer, out_features=self.embedding_size)
-        
-        # make the last layers params trainable
-        #for p in self.base_model.fc.parameters():
-        #    p.requires_grad = True"""
-
-    def forward(self, image):
-        x = self.base_model(image)
-        output = torch.sigmoid(x)
-
-        return output
-
 class Decoder(nn.Module):
 
     def __init__(self, vocab_size=10000, embedding_size=256, hidden_size=256, rnn_cells=128, rnn_dropout=0.):
