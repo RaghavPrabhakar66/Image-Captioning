@@ -1,5 +1,5 @@
 data/images/*.jpg
-
+.vscode
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
