@@ -2,6 +2,8 @@ import torch
 from torch.nn import Module, Linear, LSTM, Embedding
 import torch.nn.functional as F
 from torchvision import models
+from torchsummary import summary
+
 
 class Encoder(Module):
     """
@@ -81,14 +83,14 @@ class Decoder(Module):
 
     def forward(self, img_features, caption):
         embeddings = self.embed(caption)
-        embeddings = torch.cat((img_features.unsqueeze(0), embeddings), dim=0)
+        embeddings = torch.cat((img_features.unsqueeze(1), embeddings), dim=1)
         output, _ = self.lstm(embeddings)
         outputs = self.fc1(output)
 
         return outputs
 
 class Model(Module):
-    def __init__(self, backbone, embed_size, hidden_size, vocab_size, lstm_cells, lstm_dropout):
+    def __init__(self, backbone, embed_size, hidden_size, vocab_size, lstm_cells, lstm_dropout, verbose, device):
         super(Model, self).__init__()
 
         self.embed_size = embed_size
@@ -96,6 +98,7 @@ class Model(Module):
         self.vocab_size = vocab_size
         self.num_rnn = lstm_cells
         self.dropout = lstm_dropout
+        self.device  = device
 
         self.encoder = Encoder(backbone=backbone, embedding_size=self.embed_size)
         self.decoder = Decoder(embedding_size=self.embed_size, 
@@ -103,14 +106,21 @@ class Model(Module):
                             vocab_size=self.vocab_size, 
                             lstm_cells=self.num_rnn, 
                             lstm_dropout=self.dropout)
+
+        self.encoder.to(device)
+        self.decoder.to(device)
+
+        if verbose:
+            print("*"*20)
+            print("Encoder Architecture : ")
+            print("*"*20)
+            summary(self.encoder.cuda(), shape=(1, 224, 224))
     
     def forward(self, data):
-        image, caption = data['image'], data['caption']
-        print(caption[:-1])
-        #caption = caption.transpose(0, 1)
-        
+        image, caption = data['image'].to(self.device), data['caption'].to(self.device)
+
         img_features      = self.encoder(image)
-        caption_predicted = self.decoder(img_features, caption[:-1])
+        caption_predicted = self.decoder(img_features, caption[:, :-1])
 
         return caption_predicted
 
