@@ -1,5 +1,5 @@
 # Image-Captioning
 
 ## TO-DO: 
-- [ ] Build Decoder.
+- [x] Build Decoder.
 - [ ] Build Training Loop.
