@@ -115,6 +115,13 @@ class Model(Module):
             print("Encoder Architecture : ")
             print("*"*20)
             summary(self.encoder.cuda(), shape=(1, 224, 224))
+
+            print()
+
+            print("*"*20)
+            print("Decoder Architecture : ")
+            print("*"*20)
+            summary(self.encoder.cuda(), shape=(1, 224, 224))
     
     def forward(self, data):
         image, caption = data['image'].to(self.device), data['caption'].to(self.device)

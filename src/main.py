@@ -20,6 +20,7 @@ def main(params, show_imgs=False, resume_training=False):
     torch.manual_seed(params['seed'])       # pytorch random seed
     np.random.seed(params['seed'])          # numpy random seed
     torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.enabled = False
 
     captions_csv = pd.read_csv(os.path.abspath(params['csv_filepath']))
 
@@ -27,6 +28,9 @@ def main(params, show_imgs=False, resume_training=False):
     train, val = train_test_split(captions_csv, test_size=0.2, random_state=params['seed'])
     # split the test set into test and validation
     val, test = train_test_split(val, test_size=0.1, random_state=params['seed'])
+
+    train = train.iloc[:160]
+    val   = val.iloc[:40]
 
     my_transforms_train = transforms.Compose([
                                                 #transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
@@ -71,7 +75,6 @@ def main(params, show_imgs=False, resume_training=False):
             device=params['device'])
 
     optimizer = torch.optim.Adam(model.parameters(), lr=params['lr'], betas=params['betas'], eps=params['eps'], weight_decay=params['weight_decay'])
-    #criterion = torch.nn.CrossEntropyLoss()
     criterion = torch.nn.CrossEntropyLoss()
 
     train_loss , train_accuracy = [], []
@@ -91,21 +94,23 @@ def main(params, show_imgs=False, resume_training=False):
 
         val_loss = loaded_checkpoint['val_loss']
         val_accuracy = loaded_checkpoint['val_acc']
-    
+
     for epoch in range(start_epoch, params['epochs']):
-        print(f"Epoch {epoch+1} of {params['epochs']}")
+        print(f"\nEpoch {epoch+1} of {params['epochs']}")
+        print("-"*15)
+        print()
 
         train_epoch_loss, train_epoch_accuracy = train_fit(params['device'], model, train_dataloader, optimizer, criterion, train_set)
         val_epoch_loss, val_epoch_accuracy     = validation_fit(params['device'], model, val_dataloader, optimizer, criterion, val_set)
-        
+
         train_loss.append(train_epoch_loss)
         train_accuracy.append(train_epoch_accuracy)
-    
+
         val_loss.append(val_epoch_loss)
         val_accuracy.append(val_epoch_accuracy)
 
-        print(f"Train Loss: {train_epoch_loss:.8f}, Train Acc: {train_epoch_accuracy:.8f}")
-        print(f'Val Loss: {val_epoch_loss:.8f}, Val Acc: {val_epoch_accuracy:.8f}')
+        print(f"Train Loss:\t {train_epoch_loss:.8f}, Train Acc:\t {train_epoch_accuracy:.8f}")
+        print(f'Val Loss:\t {val_epoch_loss:.8f}, Val Acc:\t {val_epoch_accuracy:.8f}')
 
         # save model checkpoint
         checkpoint = {
@@ -120,14 +125,10 @@ def main(params, show_imgs=False, resume_training=False):
 
         torch.save(checkpoint, os.path.join(params['CKPT_DIR'], 'model.pt'))
 
-    prediction = model(sample_batched)
-
-    print(prediction.shape)
-
 if __name__ == '__main__':
     params = {
-        'csv_filepath'  : r'data\flickr8k_img_captions_new.csv',
-        'CKPT_DIR'      : r'models/',
+        'csv_filepath'  : r'data\captions.csv',
+        'CKPT_DIR'      : r'C:\Users\ragha\Desktop\Projects\Image-Captioning\models',
         'LOAD_CKPT_PATH': '',
         'seed'          : 42,
         'device'        : 'cuda' if torch.cuda.is_available() else 'cpu',
@@ -136,12 +137,13 @@ if __name__ == '__main__':
         'betas'         : (0.9, 0.999),
         'eps'           : 1e-8,
         'weight_decay'  : 0.0005,
-        'momentum'      : 0.1,
         'num_workers'   : 4,  # simple rule 4*no.of gpu'
         'IMG_SIZE'      : 224,
         'batch_size'    : 4
     }
+
     pprint(params)
+
     main(
         params=params,
         show_imgs=False,
