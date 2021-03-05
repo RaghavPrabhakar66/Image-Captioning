@@ -1,5 +1,8 @@
 # Image-Captioning
 
 ## TO-DO: 
-- [ ] Build Decoder.
+- [x] Build Decoder.
 - [ ] Build Training Loop.
+- [ ] Image Augmentation
+  - [ ] Pytorch inbuilt augmentation
+  - [ ] Advanced Augmentation with external libraries.
