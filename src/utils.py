@@ -58,13 +58,12 @@ class Vocab:
         self.json_dict  = {}
         self.MAX_LEN    = 37
         self.MAX_INDEX  = 0
-        #self.vocab_path  = os.path.abspath(Z"data/vocab.json")
-        self.vocab_path  = r'C:\Users\ragha\Desktop\Projects\Image-Captioning\data\vocab.json'
+        self.vocab_path  = os.path.abspath("data/vocab.json")
 
         if os.path.exists(self.vocab_path):
             with open(self.vocab_path, 'r') as f:
                 self.word2index = json.load(f)
-                #self.index2word = dict(zip(self.word2index.values(), self.word2index.keys()))
+                self.index2word = dict(zip(self.word2index.values(), self.word2index.keys()))
                 self.MAX_INDEX = max(self.word2index.values())
         else:
             print('File does not exist.')
@@ -107,24 +106,7 @@ def show_imgs(img):
     img  = convertFromTensor(img)
     plt.imshow(img)
     plt.show()
-
-def notify_discord(training_loss, training_acc, val_loss, val_acc, epoch, total_epochs, name, save_path):
-    webhook_url = 'https://discord.com/api/webhooks/780807520096354324/qRvzV3CLSC2zfoN4Psd0HT47uLoOpmaN-12WVq3FLZmIM9i-G-U06WZXWnQqGWdBDu6c'
-    webhook = Webhook.from_url(webhook_url, adapter=RequestsWebhookAdapter())
-
-    title  = "Epoch: " + str(epoch) + " of " + str(total_epochs)
-    footer = "saved model: " + save_path
-
-    embed=discord.Embed(title=title, description=" ", color=0x8a0085)
-    embed.set_author(name=name)
-    embed.set_thumbnail(url="https://pytorch.org/assets/images/pytorch-logo.png")
-    embed.add_field(name="Training Accuracy", value=training_acc, inline=False)
-    embed.add_field(name="Training Loss", value=training_loss, inline=False)
-    embed.add_field(name="Validation Accuracy", value=val_acc, inline=False)
-    embed.add_field(name="Validation Loss", value=val_loss, inline=False)
-    embed.set_footer(text=footer)
     
-    webhook.send(embed=embed)
 class DiscordNotifier:
     def __init__(self, webhook_url=None)
         self.webhook_url = webhook_url
