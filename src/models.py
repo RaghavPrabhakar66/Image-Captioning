@@ -90,7 +90,7 @@ class Decoder(Module):
         return outputs
 
 class Model(Module):
-    def __init__(self, backbone, embed_size, hidden_size, vocab_size, lstm_cells, lstm_dropout, verbose, device):
+    def __init__(self, backbone, freeze_layers, embed_size, hidden_size, vocab_size, lstm_cells, lstm_dropout, verbose, device):
         super(Model, self).__init__()
 
         self.embed_size = embed_size
@@ -100,7 +100,7 @@ class Model(Module):
         self.dropout = lstm_dropout
         self.device  = device
 
-        self.encoder = Encoder(backbone=backbone, embedding_size=self.embed_size)
+        self.encoder = Encoder(backbone=backbone, embedding_size=self.embed_size, freeze_layers=freeze_layers)
         self.decoder = Decoder(embedding_size=self.embed_size, 
                             hidden_size=self.hidden_size, 
                             vocab_size=self.vocab_size, 
