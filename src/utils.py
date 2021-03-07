@@ -112,7 +112,7 @@ class DiscordNotifier:
         self.webhook_url = webhook_url
     
     def notify_discord(self, training_loss, training_acc, val_loss, val_acc, epoch, total_epochs, name, save_path):
-        webhook = Webhook.from_url(webhook_url, adapter=RequestsWebhookAdapter())
+        webhook = Webhook.from_url(self.webhook_url, adapter=RequestsWebhookAdapter())
         
         title  = "Epoch: " + str(epoch) + " of " + str(total_epochs)
         footer = "saved model: " + save_path
