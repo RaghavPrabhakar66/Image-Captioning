@@ -2,6 +2,7 @@ import os
 import spacy
 import json
 import matplotlib.pyplot as plt
+import discord
 from discord import Webhook, RequestsWebhookAdapter
 
 sp = spacy.load("en_core_web_sm")  # load english core
@@ -108,10 +109,10 @@ def show_imgs(img):
     plt.show()
     
 class DiscordNotifier:
-    def __init__(self, webhook_url=None)
+    def __init__(self, webhook_url=None):
         self.webhook_url = webhook_url
     
-    def notify_discord(self, training_loss, training_acc, val_loss, val_acc, epoch, total_epochs, name, save_path):
+    def send_message(self, training_loss, training_acc, val_loss, val_acc, epoch, total_epochs, name, save_path):
         webhook = Webhook.from_url(self.webhook_url, adapter=RequestsWebhookAdapter())
         
         title  = "Epoch: " + str(epoch) + " of " + str(total_epochs)
