@@ -2,6 +2,7 @@ import os
 import spacy
 import json
 import matplotlib.pyplot as plt
+from discord import Webhook, RequestsWebhookAdapter
 
 sp = spacy.load("en_core_web_sm")  # load english core
 
@@ -106,3 +107,42 @@ def show_imgs(img):
     img  = convertFromTensor(img)
     plt.imshow(img)
     plt.show()
+
+def notify_discord(training_loss, training_acc, val_loss, val_acc, epoch, total_epochs, name, save_path):
+    webhook_url = 'https://discord.com/api/webhooks/780807520096354324/qRvzV3CLSC2zfoN4Psd0HT47uLoOpmaN-12WVq3FLZmIM9i-G-U06WZXWnQqGWdBDu6c'
+    webhook = Webhook.from_url(webhook_url, adapter=RequestsWebhookAdapter())
+
+    title  = "Epoch: " + str(epoch) + " of " + str(total_epochs)
+    footer = "saved model: " + save_path
+
+    embed=discord.Embed(title=title, description=" ", color=0x8a0085)
+    embed.set_author(name=name)
+    embed.set_thumbnail(url="https://pytorch.org/assets/images/pytorch-logo.png")
+    embed.add_field(name="Training Accuracy", value=training_acc, inline=False)
+    embed.add_field(name="Training Loss", value=training_loss, inline=False)
+    embed.add_field(name="Validation Accuracy", value=val_acc, inline=False)
+    embed.add_field(name="Validation Loss", value=val_loss, inline=False)
+    embed.set_footer(text=footer)
+    
+    webhook.send(embed=embed)
+class DiscordNotifier:
+    def __init__(self, webhook_url=None)
+        self.webhook_url = webhook_url
+    
+    def notify_discord(self, training_loss, training_acc, val_loss, val_acc, epoch, total_epochs, name, save_path):
+        webhook = Webhook.from_url(webhook_url, adapter=RequestsWebhookAdapter())
+        
+        title  = "Epoch: " + str(epoch) + " of " + str(total_epochs)
+        footer = "saved model: " + save_path
+
+        embed=discord.Embed(title=title, description=" ", color=0x8a0085)
+        embed.set_author(name=name)
+        embed.set_thumbnail(url="https://pytorch.org/assets/images/pytorch-logo.png")
+        embed.add_field(name="Training Accuracy", value=training_acc, inline=False)
+        embed.add_field(name="Training Loss", value=training_loss, inline=False)
+        embed.add_field(name="Validation Accuracy", value=val_acc, inline=False)
+        embed.add_field(name="Validation Loss", value=val_loss, inline=False)
+        embed.set_footer(text=footer)
+    
+        webhook.send(embed=embed)
+    
