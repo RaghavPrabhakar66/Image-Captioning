@@ -25,7 +25,8 @@ class Encoder(Module):
         # elif backbone == 'EfficientNet':
         #     pass
         else:
-            self.base_model = self.vgg16()
+            print('Please choose a valid backbone.')
+            exit()
 
         # Linear layer to produce latent vector
         self.embed = Linear(self.embedding_size, self.embedding_size)
