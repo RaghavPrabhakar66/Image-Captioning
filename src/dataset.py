@@ -5,7 +5,7 @@ import torch
 from PIL import Image
 from torch.utils.data import Dataset
 
-from utils import Vocab
+from src.utils import Vocab
 
 vocab = Vocab()
 
@@ -21,7 +21,7 @@ class Flickr8k(Dataset):
 
     def __getitem__(self, idx):
         # iloc is index based, which is what we need here
-        img_name = os.path.join(self.images, self.data.iloc[idx]['image_name'])
+        img_name = os.path.join(self.images, self.data.iloc[idx]['image'])
         image = Image.open(img_name)
 
         caption = vocab.get_word_embedding(self.data.iloc[idx]['caption'])

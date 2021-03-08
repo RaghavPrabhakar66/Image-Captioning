@@ -3,7 +3,7 @@ import pandas as pd
 from tqdm import trange, tqdm
 from time import sleep
 
-from utils import VocabBuilder
+from src.utils import VocabBuilder
 
 vocab = VocabBuilder(min_count=2, json_path='data/vocab.json')
 
