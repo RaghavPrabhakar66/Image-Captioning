@@ -88,6 +88,19 @@ class Decoder(Module):
         outputs = self.fc1(output)
 
         return outputs
+    
+    def predict(self, features, length):
+        # Find caption word by word using encoded features
+        hidden = None
+        predicted_tokens = []
+        for i in range(length):
+            features = features.unsqueeze(1)                        # features = (batch_size, 1, embedding_size)
+            outputs, hidden = self.lstm(features, hidden)   # outputs = (batch_size, 1, embedding_size)
+            outputs = self.fc1(outputs.squeeze(1))                  # outputs = (batch_size, vocab_size)
+            predicted_token_i = torch.argmax(outputs)                   # predicted_token_i = (batchsize)
+            predicted_tokens.append(predicted_token_i)
+            features = self.embed(predicted_token_i)                # features = (batch_size, embedding_size)
+        return predicted_tokens
 
 class Model(Module):
     def __init__(self, backbone, embed_size, hidden_size, vocab_size, lstm_cells, lstm_dropout, verbose, device):
@@ -130,8 +143,12 @@ class Model(Module):
         caption_predicted = self.decoder(img_features, caption[:, :-1])
 
         return caption_predicted
+    
+    # Predicts captions using given images
+    def predict(self, images, caption_length):
+        # Encode images = (batch_size, 3, 224, 224) to features = (batch_size, self.embedding_size)
+        features = self.encoder(images.to(self.device))
+        predicted_tokens = self.decoder.predict(features, caption_length)
 
-
-if __name__=='__main__':
-    en = Encoder('vgg16', 10)
-    print(en(torch.zeros((1, 3, 224, 224))))
+        #should I add token to word function here? or in inference?
+        return predicted_tokens
