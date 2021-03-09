@@ -1,8 +1,8 @@
 from PIL import Image
 import torch as T
 from torchvision import transforms
-from models import Model
-from utils import show_imgs, Vocab
+from src.models import Model
+from src.utils import show_imgs, Vocab
 
 class Inference:
     def __init__(self, size, model):
