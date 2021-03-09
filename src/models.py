@@ -94,13 +94,13 @@ class Decoder(Module):
         hidden = None
         predicted_tokens = []
         for i in range(length):
-            features = features.unsqueeze(1)                        # features = (batch_size, 1, embedding_size)
+            features = features.unsqueeze(1)                        # features = (batch_size, 1, embedding_size)        
             outputs, hidden = self.lstm(features, hidden)   # outputs = (batch_size, 1, embedding_size)
             outputs = self.fc1(outputs.squeeze(1))                  # outputs = (batch_size, vocab_size)
-            predicted_token_i = torch.argmax(outputs)                   # predicted_token_i = (batchsize)
+            predicted_token_i = torch.argmax(outputs).unsqueeze(0)                   # predicted_token_i = (batchsize)
             predicted_tokens.append(predicted_token_i)
             features = self.embed(predicted_token_i)                # features = (batch_size, embedding_size)
-        return predicted_tokens
+        return torch.stack(predicted_tokens, 1)
 
 class Model(Module):
     def __init__(self, backbone, embed_size, hidden_size, vocab_size, lstm_cells, lstm_dropout, verbose, device):
@@ -150,5 +150,4 @@ class Model(Module):
         features = self.encoder(images.to(self.device))
         predicted_tokens = self.decoder.predict(features, caption_length)
 
-        #should I add token to word function here? or in inference?
         return predicted_tokens

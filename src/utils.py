@@ -57,13 +57,13 @@ class Vocab:
         self.json_dict  = {}
         self.MAX_LEN    = 37
         self.MAX_INDEX  = 0
-        #self.vocab_path  = os.path.abspath(Z"data/vocab.json")
-        self.vocab_path  = r'C:\Users\ragha\Desktop\Projects\Image-Captioning\data\vocab.json'
+        self.vocab_path  = os.path.abspath(r"data/vocab.json")
+        # self.vocab_path  = r'C:\Users\ragha\Desktop\Projects\Image-Captioning\data\vocab.json'
 
         if os.path.exists(self.vocab_path):
             with open(self.vocab_path, 'r') as f:
                 self.word2index = json.load(f)
-                #self.index2word = dict(zip(self.word2index.values(), self.word2index.keys()))
+                self.index2word = dict(zip(self.word2index.values(), self.word2index.keys()))
                 self.MAX_INDEX = max(self.word2index.values())
         else:
             print('File does not exist.')
