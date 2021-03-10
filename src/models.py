@@ -96,7 +96,7 @@ class Decoder(Module):
         predicted_tokens = []
         for i in range(length):
             features = features.unsqueeze(1)                        # features = (batch_size, 1, embedding_size)        
-            outputs, hidden = self.lstm(features, hidden)   # outputs = (batch_size, 1, embedding_size)
+            outputs, hidden = self.lstm(features, hidden)           # outputs = (batch_size, 1, embedding_size)
             outputs = self.fc1(outputs.squeeze(1))                  # outputs = (batch_size, vocab_size)
             predicted_token_i = torch.argmax(outputs).unsqueeze(0)                   # predicted_token_i = (batchsize)
             predicted_tokens.append(predicted_token_i)
@@ -141,7 +141,7 @@ class Model(Module):
         image, caption = data['image'].to(self.device), data['caption'].to(self.device)
 
         img_features      = self.encoder(image)
-        caption_predicted = self.decoder(img_features, caption[:, :-1])
+        caption_predicted = self.decoder(img_features, caption)[:, :-1]
 
         return caption_predicted
     
@@ -152,3 +152,8 @@ class Model(Module):
         predicted_tokens = self.decoder.predict(features, caption_length)
 
         return predicted_tokens
+
+if __name__ == '__main__':
+    d = Decoder(8, 12, 16, 1)
+    output = d(torch.ones(1, 12), torch.ones(1, 39).long())
+    print(output.shape)
