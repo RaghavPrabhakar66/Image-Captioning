@@ -26,11 +26,11 @@ def train_fit(device, model, dataloader, optimizer, criterion, dataset):
         """
         batch_size = 4
 
-        target_caption = [4, 37]
-        predicted_caption = [4, 37, 8493]
+        target_caption = [4, 39]
+        predicted_caption = [4, 39, 8493]
 
-        target_caption.reshape(-1) = [138]
-        predicted_cation.reshape(-1, predicted_caption.shape[2]) = [138, 8493]
+        target_caption.reshape(-1) = [4 * 39]
+        predicted_cation.reshape(-1, predicted_caption.shape[2]) = [4 * 39, 8493]
 
         """
 
@@ -77,10 +77,10 @@ def validation_fit(device, model, dataloader, optimizer, criterion, dataset):
         """
         batch_size = 4
 
-        target_caption = [4, 37]
-        predicted_caption = [4, 37, 8493]
+        target_caption = [4, 39]
+        predicted_caption = [4, 39, 8493]
 
-        target_caption.reshape(-1) = [138]
+        target_caption.reshape(-1) = [4 * 39]
         predicted_cation.reshape(-1, predicted_caption.shape[2]) = [138, 8493]
 
         """

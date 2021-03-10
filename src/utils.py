@@ -57,7 +57,7 @@ class Vocab:
         self.word2index = {}
         self.index2word = {}
         self.json_dict  = {}
-        self.MAX_LEN    = 37
+        self.MAX_LEN    = 37 + 2
         self.MAX_INDEX  = 0
         self.vocab_path  = os.path.abspath("data/vocab.json")
 
@@ -80,14 +80,13 @@ class Vocab:
                 final_caption.append(self.word2index['<UNK>'])
             else:
                 final_caption.append(self.word2index[token])
+        final_caption.append(self.word2index['<END>'])
 
         diff = self.MAX_LEN - len(final_caption)
 
-        if diff!=0:
-            final_caption.extend([self.word2index['<PAD>'] for i in range(diff-1)])
-
-        final_caption.append(self.word2index['<END>'])
-
+        if diff > 0:
+            final_caption.extend([self.word2index['<PAD>'] for i in range(diff)])
+        assert len(final_caption) == self.MAX_LEN
         return final_caption
 
     def get_word_token(self, word_embedding):

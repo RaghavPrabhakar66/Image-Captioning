@@ -5,12 +5,9 @@ import torch
 from PIL import Image
 from torch.utils.data import Dataset
 
-from src.utils import Vocab
-
-vocab = Vocab()
-
 class Flickr8k(Dataset):
     def __init__(self, df, data_dir=None, transforms=None):
+        
         self.data = df
         self.data_dir = data_dir
         self.images = os.path.join(self.data_dir, 'Images')
@@ -24,8 +21,7 @@ class Flickr8k(Dataset):
         img_name = os.path.join(self.images, self.data.iloc[idx]['image'])
         image = Image.open(img_name)
 
-        caption = vocab.get_word_embedding(self.data.iloc[idx]['caption'])
-        #captions = np.array(self.data.iloc[idx:idx+1, 1:])[0].tolist()
+        caption = list(self.data.iloc[idx][1:])
 
         if self.transforms:
             image = self.transforms(image)
