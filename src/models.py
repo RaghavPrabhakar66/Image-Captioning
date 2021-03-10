@@ -41,7 +41,7 @@ class Encoder(Module):
         model.classifier = Linear(model.classifier[0].in_features, self.embedding_size)
         return model
 
-    def resnet(self):
+    def resnet18(self):
         model = models.resnet18(pretrained=True)
         if self.freeze_layers:
             for parameter in model.parameters():
