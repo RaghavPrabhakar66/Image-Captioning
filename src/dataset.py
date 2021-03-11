@@ -26,4 +26,4 @@ class Flickr8k(Dataset):
         if self.transforms:
             image = self.transforms(image)
 
-        return {'image': image, 'caption': torch.tensor(caption)}
+        return {'image': image, 'caption': torch.tensor(caption), 'info': [idx, img_name]}
