@@ -18,7 +18,7 @@ class Flickr8k(Dataset):
 
     def __getitem__(self, idx):
         # iloc is index based, which is what we need here
-        img_name = os.path.join(self.images, self.data.iloc[idx]['image'])
+        img_name = os.path.join(self.images, self.data.iloc[idx][0])
         image = Image.open(img_name)
 
         caption = list(self.data.iloc[idx][1:])
