@@ -3,8 +3,6 @@ from torch.nn import Module, Linear, LSTM, Embedding
 import torch.nn.functional as F
 from torchvision import models
 from torchsummary import summary
-
-
 class Encoder(Module):
     """
     CNN encoder using pretrained models
