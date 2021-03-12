@@ -149,8 +149,8 @@ if __name__ == '__main__':
         'lstm_dropout'  : 0.5,
 
         'epochs'        : 2,
-        'batch_size'    : 4
-        'optmizier'     : 'adam'         # ['adam', 'sgd', 'rmsprop' 'nadam']
+        'batch_size'    : 4,
+        'optmizier'     : 'adam',         # ['adam', 'sgd', 'rmsprop' 'nadam']
         'lr'            : 0.01,
         'betas'         : (0.9, 0.999),
         'eps'           : 1e-8,
