@@ -111,7 +111,7 @@ class DiscordNotifier:
     def __init__(self, webhook_url=None):
         self.webhook_url = webhook_url
     
-    def send_message(self, training_loss, training_acc, val_loss, val_acc, epoch, total_epochs, name, save_path):
+    def send_message(self, training_loss, val_loss, epoch, total_epochs, name, save_path):
         webhook = Webhook.from_url(self.webhook_url, adapter=RequestsWebhookAdapter())
         
         title  = "Epoch: " + str(epoch) + " of " + str(total_epochs)
@@ -120,9 +120,7 @@ class DiscordNotifier:
         embed=discord.Embed(title=title, description=" ", color=0x8a0085)
         embed.set_author(name=name)
         embed.set_thumbnail(url="https://pytorch.org/assets/images/pytorch-logo.png")
-        embed.add_field(name="Training Accuracy", value=training_acc, inline=False)
         embed.add_field(name="Training Loss", value=training_loss, inline=False)
-        embed.add_field(name="Validation Accuracy", value=val_acc, inline=False)
         embed.add_field(name="Validation Loss", value=val_loss, inline=False)
         embed.set_footer(text=footer)
     
