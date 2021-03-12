@@ -28,9 +28,6 @@ class Encoder(Module):
             print('Please choose a valid backbone.')
             exit()
 
-        # Linear layer to produce latent vector
-        self.embed = Linear(self.embedding_size, self.embedding_size)
-
     # Backbone Creation: Load weights, freeze layers, replace classifier heads with dense layers
     def vgg16(self):
         model =  models.vgg16(pretrained=True)
@@ -71,7 +68,6 @@ class Encoder(Module):
     # Foward pass
     def forward(self, input):
         x = self.base_model(input)
-        x = F.relu(self.embed(x))
 
         return x
 class Decoder(Module):
@@ -151,7 +147,7 @@ class Model(Module):
         image, caption = data['image'].to(self.device), data['caption'].to(self.device)
 
         img_features      = self.encoder(image)
-        caption_predicted = self.decoder(img_features, caption)[:, :-1]
+        caption_predicted = self.decoder(img_features, caption[:, :-1])
 
         return caption_predicted
     
