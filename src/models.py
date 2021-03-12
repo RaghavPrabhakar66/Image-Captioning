@@ -79,9 +79,9 @@ class Decoder(Module):
         self.embed_size  = embedding_size
         self.hidden_size = hidden_size
 
-        self.embed = Embedding(self.vocab_size, self.embed_size)
+        self.embed  = Embedding(self.vocab_size, self.embed_size)
         self.lstm   = LSTM(input_size=self.embed_size, hidden_size=self.hidden_size, num_layers=lstm_cells, batch_first=True, dropout=lstm_dropout)
-        self.fc1   = Linear(self.hidden_size, self.vocab_size)
+        self.fc1    = Linear(self.hidden_size, self.vocab_size)
 
     def init_hidden_state(self):
         x = torch.zeros(self.hidden_size)
@@ -113,22 +113,19 @@ class Model(Module):
     def __init__(self, backbone, freeze_layers, embed_size, hidden_size, vocab_size, lstm_cells, lstm_dropout, verbose, device):
         super(Model, self).__init__()
 
-        self.embed_size = embed_size
+        self.embed_size  = embed_size
         self.hidden_size = hidden_size
-        self.vocab_size = vocab_size
-        self.num_rnn = lstm_cells
-        self.dropout = lstm_dropout
-        self.device  = device
+        self.vocab_size  = vocab_size
+        self.num_rnn     = lstm_cells
+        self.dropout     = lstm_dropout
+        self.device      = device
 
-        self.encoder = Encoder(backbone=backbone, embedding_size=self.embed_size, freeze_layers=freeze_layers)
+        self.encoder = Encoder(backbone=backbone, embedding_size=self.embed_size, freeze_layers=freeze_layers).to(self.device)
         self.decoder = Decoder(embedding_size=self.embed_size, 
                             hidden_size=self.hidden_size, 
                             vocab_size=self.vocab_size, 
                             lstm_cells=self.num_rnn, 
-                            lstm_dropout=self.dropout)
-
-        self.encoder.to(device)
-        self.decoder.to(device)
+                            lstm_dropout=self.dropout).to(self.device)
 
         if verbose:
             print("*"*20)
