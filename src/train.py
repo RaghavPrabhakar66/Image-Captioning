@@ -10,7 +10,9 @@ def train_fit(device, model, dataloader, optimizer, criterion, dataset, ignore):
     train_running_correct = 0
     
     for i, data in enumerate(tqdm(dataloader, total=int(len(dataset)/dataloader.batch_size))):
-        if i not in ignore:
+        if i in ignore:
+            print("Image Name : ", data['debug_img_name'], 'Idx : ', data[debug_idx])
+        else:
             # Load the input features and labels from the training dataset
             target_caption = data['caption'].to(device)
 
