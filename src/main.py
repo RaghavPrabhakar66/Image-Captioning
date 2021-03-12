@@ -29,9 +29,6 @@ def main(params, show_imgs=False, resume_training=False):
     # split the test set into test and validation
     val, test = train_test_split(val, test_size=0.1, random_state=params['seed'])
 
-    train = train.iloc[:160]
-    val   = val.iloc[:40]
-
     my_transforms_train = transforms.Compose([
                                                 #transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
                                                 transforms.Resize((params['IMG_SIZE'], params['IMG_SIZE'])),
@@ -45,10 +42,10 @@ def main(params, show_imgs=False, resume_training=False):
     ])
 
     train_set = Flickr8k(df=train, data_dir=os.path.abspath('data'), transforms=my_transforms_train)
-    train_dataloader = DataLoader(train_set, batch_size=params['batch_size'], shuffle=True, num_workers=params['num_workers'])
+    train_dataloader = DataLoader(train_set, batch_size=params['batch_size'], shuffle=False, num_workers=params['num_workers'])
 
     val_set = Flickr8k(df=val, data_dir=os.path.abspath('data'), transforms=my_transforms_val)
-    val_dataloader = DataLoader(val_set, batch_size=params['batch_size'], shuffle=True, num_workers=params['num_workers'])
+    val_dataloader = DataLoader(val_set, batch_size=params['batch_size'], shuffle=False, num_workers=params['num_workers'])
 
     if show_imgs:
         for i_batch, sample_batched in enumerate(train_dataloader):
@@ -65,16 +62,24 @@ def main(params, show_imgs=False, resume_training=False):
                 break
 
     model = Model(
-            backbone='vgg16',
-            embed_size=128, 
-            hidden_size=128, 
+            backbone=params['backbone'],
+            embed_size=params['embed_size'], 
+            hidden_size=params['hidden_size'], 
             vocab_size=vocab.MAX_INDEX, 
-            lstm_cells=128, 
-            lstm_dropout=0.5,
+            lstm_cells=params['lstm_cells'], 
+            lstm_dropout=params['lstm_dropout'],
             verbose=False,
             device=params['device'])
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=params['lr'], betas=params['betas'], eps=params['eps'], weight_decay=params['weight_decay'])
+    if params['optimizer']=='sgd':
+      optimizer = torch.optim.SGD(model.parameters(), lr=params['lr'], betas=params['betas'], eps=params['eps'], weight_decay=params['weight_decay'], decay=1e-5, decay=1e-5, momentum=0.9, nesterov=True)
+    elif params['optimizer']=='rmsprop':
+      optimizer = torch.optim.RMSprop(model.parameters(), lr=params['lr'], betas=params['betas'], eps=params['eps'], weight_decay=params['weight_decay'], decay=1e-5)
+    elif params['optimizer']=='adam':
+      optimizer = torch.optim.Adam(model.parameters(), lr=params['lr'], betas=params['betas'], eps=params['eps'], weight_decay=params['weight_decay'])
+    elif params['optimizer']=='nadam':
+      optimizer = torch.optim.Nadam(model.parameters(), lr=params['lr'], betas=params['betas'], eps=params['eps'], weight_decay=params['weight_decay'], decay=1e-5)
+
     criterion = torch.nn.CrossEntropyLoss()
 
     train_loss , train_accuracy = [], []
@@ -130,16 +135,26 @@ if __name__ == '__main__':
         'csv_filepath'  : r'data\captions.csv',
         'CKPT_DIR'      : r'C:\Users\ragha\Desktop\Projects\Image-Captioning\models',
         'LOAD_CKPT_PATH': '',
-        'seed'          : 42,
+
         'device'        : 'cuda' if torch.cuda.is_available() else 'cpu',
+        'num_workers'   : 4,             # simple rule 4*no.of gpu'
+        
+        'seed'          : 42,
+        'IMG_SIZE'      : 224,
+
+        'backbone'      : 'resnet50',    # ['vgg16', 'resnet18', 'resnet50', 'efficientnet', 'inception']
+        'embed_size'    : 128, 
+        'hidden_size'   : 128, 
+        'lstm_cells'    : 128, 
+        'lstm_dropout'  : 0.5,
+
         'epochs'        : 2,
+        'batch_size'    : 4
+        'optmizier'     : 'adam'         # ['adam', 'sgd', 'rmsprop' 'nadam']
         'lr'            : 0.01,
         'betas'         : (0.9, 0.999),
         'eps'           : 1e-8,
         'weight_decay'  : 0.0005,
-        'num_workers'   : 4,  # simple rule 4*no.of gpu'
-        'IMG_SIZE'      : 224,
-        'batch_size'    : 4
     }
 
     pprint(params)
