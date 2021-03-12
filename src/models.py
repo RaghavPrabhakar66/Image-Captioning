@@ -18,6 +18,8 @@ class Encoder(Module):
             self.base_model = self.vgg16()
         elif backbone == 'resnet18':
             self.base_model = self.resnet18()
+        elif backbone == 'resnet50':
+            self.base_model = self.resnet50()                 
         elif backbone == 'inception-v3':
             self.base_model = self.inception()
         # elif backbone == 'EfficientNet':
@@ -47,6 +49,16 @@ class Encoder(Module):
         
         model.fc = Linear(model.fc.in_features, self.embedding_size)
         return model
+    
+    def resnet50(self):
+        model = models.resnet50(pretrained=True)
+        if self.freeze_layers:
+            for parameter in model.parameters():
+                parameter.requires_grad = False
+        
+        model.fc = Linear(model.fc.in_features, self.embedding_size)
+        return model
+  
 
     def inception(self):
         model = models.inception_v3(pretrained=True)
