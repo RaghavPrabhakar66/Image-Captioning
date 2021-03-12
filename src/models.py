@@ -164,6 +164,9 @@ class Model(Module):
         return predicted_tokens
 
 if __name__ == '__main__':
-    d = Decoder(8, 12, 16, 1)
+    """ d = Decoder(8, 12, 16, 1)
     output = d(torch.ones(1, 12), torch.ones(1, 39).long())
-    print(output.shape)
+    print(output.shape) """
+
+    e = Encoder(backbone='resnet50', embedding_size=128, freeze_layers=False)
+    print(e)
