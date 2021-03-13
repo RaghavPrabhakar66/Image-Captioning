@@ -21,8 +21,8 @@ def main(params, show_imgs=False, resume_training=False):
     np.random.seed(params['seed'])          # numpy random seed
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.enabled = False
-
-    captions_csv = pd.read_csv(os.path.abspath(params['csv_filepath']))
+    
+    captions_csv = pd.read_csv(os.path.abspath(params['csv_filepath']), names=["image", "caption", "references"], converters={'caption': eval, 'references':eval})
 
     # split the dataframe into train and testget_word_embedding
     train, val = train_test_split(captions_csv, test_size=0.2, random_state=params['seed'])
