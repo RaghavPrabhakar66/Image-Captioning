@@ -29,4 +29,4 @@ class Flickr8k(Dataset):
         if self.transforms:
             image = self.transforms(image)
 
-        return {'image': image, 'caption': torch.tensor(tokenize(caption)), 'references': references}
+        return {'image': image, 'tokenized_caption': torch.tensor(tokenize(caption)), 'caption': caption, 'references': references}

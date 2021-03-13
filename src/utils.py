@@ -75,8 +75,6 @@ class Vocab:
         return caption
 
     def get_word_embedding(self, caption):
-        caption = preprocess_caption
-        
         final_caption = []
         final_caption.append(self.word2index['<START>'])
 
