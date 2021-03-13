@@ -97,16 +97,17 @@ class Decoder(Module):
         return outputs
     
     def predict(self, features, length):
-        # Find caption word by word using encoded features
+        # Find caption word by word using encoded features and greedy aproach
         hidden = None
         predicted_tokens = []
         for i in range(length):
-            features = features.unsqueeze(1)                        # features = (batch_size, 1, embedding_size)        
+            # features = features.unsqueeze(1)                        # features = (batch_size, 1, embedding_size)        
             outputs, hidden = self.lstm(features, hidden)           # outputs = (batch_size, 1, embedding_size)
+            outputs = outputs.squeeze(1)
             outputs = self.fc1(outputs.squeeze(1))                  # outputs = (batch_size, vocab_size)
-            predicted_token_i = torch.argmax(outputs).unsqueeze(0)                   # predicted_token_i = (batchsize)
+            predicted_token_i = outputs.max(1)[1]                   # predicted_token_i = (batchsize)
             predicted_tokens.append(predicted_token_i)
-            features = self.embed(predicted_token_i)                # features = (batch_size, embedding_size)
+            features = self.embed(predicted_token_i).unsqueeze(1)   # features = (batch_size, embedding_size)
         return torch.stack(predicted_tokens, 1)
 
 class Model(Module):
@@ -152,7 +153,7 @@ class Model(Module):
     def predict(self, images, caption_length):
         # Encode images = (batch_size, 3, 224, 224) to features = (batch_size, self.embedding_size)
         features = self.encoder(images.to(self.device))
-        predicted_tokens = self.decoder.predict(features, caption_length)
+        predicted_tokens = self.decoder.predict(features.unsqueeze(1), caption_length)
 
         return predicted_tokens
 
