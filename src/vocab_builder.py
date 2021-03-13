@@ -49,7 +49,6 @@ def main(create_vocab = False, process_captions = False, file_path = os.path.abs
                 references.append(temp)
 
         captions_df = pd.DataFrame(list(zip(final_img_name, final_caption, references)))
-        print(len(captions_df))
         captions_df.to_csv(final_csv_path, header=False, index=False)
 
 if __name__=='__main__':
