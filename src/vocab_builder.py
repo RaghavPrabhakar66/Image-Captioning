@@ -30,15 +30,13 @@ def main(create_vocab = False, process_captions = False, file_path = os.path.abs
         final_img_name, final_caption, references = [], [], []
 
         # Use vocabulary generated to tokenize captions and store them in a seperate file
-        tokenize = Vocab().get_word_embedding
         cap_file = pd.read_csv(file_path)
 
         for i in tqdm(cap_file.index):
-            new_line = tokenize(cap_file.loc[i][1])
             if cap_file.loc[i][0] in captions:
-                captions[cap_file.loc[i][0]].append(new_line)
+                captions[cap_file.loc[i][0]].append(Vocab.preprocess_caption(cap_file.loc[i][1]))
             else:
-                captions[cap_file.loc[i][0]] = [new_line]
+                captions[cap_file.loc[i][0]] = [Vocab.preprocess_caption(cap_file.loc[i][1])]
 
         for i, img in enumerate(captions.keys()):
             for j in range(5):
@@ -49,7 +47,6 @@ def main(create_vocab = False, process_captions = False, file_path = os.path.abs
                 references.append(temp)
 
         captions_df = pd.DataFrame(list(zip(final_img_name, final_caption, references)))
-        print(len(captions_df))
         captions_df.to_csv(final_csv_path, header=False, index=False)
 
 if __name__=='__main__':

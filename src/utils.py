@@ -68,9 +68,14 @@ class Vocab:
                 self.MAX_INDEX = max(self.word2index.values())
         else:
             print('File does not exist.')
+    
+    def preprocess_caption(caption):
+        caption = [token.text.lower() for token in sp.tokenizer(caption) if not token.is_punct]
+        
+        return caption
 
     def get_word_embedding(self, caption):
-        caption = [token.text.lower() for token in sp.tokenizer(caption) if not token.is_punct]
+        caption = preprocess_caption
         
         final_caption = []
         final_caption.append(self.word2index['<START>'])

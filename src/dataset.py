@@ -4,6 +4,9 @@ import numpy as np
 import torch
 from PIL import Image
 from torch.utils.data import Dataset
+from utils import Vocab
+
+tokenize = Vocab().get_word_embedding
 
 class Flickr8k(Dataset):
     def __init__(self, df, data_dir=None, transforms=None):
@@ -17,13 +20,13 @@ class Flickr8k(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-        # iloc is index based, which is what we need here
         img_name = os.path.join(self.images, self.data.iloc[idx][0])
-        image = Image.open(img_name)
+        image    = Image.open(img_name)
 
-        caption = list(self.data.iloc[idx][1:])
+        caption    = self.data.iloc[idx][1]
+        references = self.data.iloc[idx][2]
 
         if self.transforms:
             image = self.transforms(image)
 
-        return {'image': image, 'caption': torch.tensor(caption), 'debug_img_name': img_name, 'debug_idx': idx}
+        return {'image': image, 'caption': torch.tensor(tokenize(caption)), 'references': references}
