@@ -1,5 +1,5 @@
 import torch
-from torch.nn import Module, Linear, LSTM, Embedding
+from torch.nn import Module, Linear, LSTM, Embedding, Dropout, ReLU
 import torch.nn.functional as F
 from torchvision import models
 from torchsummary import summary
@@ -73,36 +73,42 @@ class Encoder(Module):
         return x
 class Decoder(Module):
 
-    def __init__(self, vocab_size=10000, embedding_size=256, hidden_size=256, lstm_cells=128, lstm_dropout=0.):
+    def __init__(self, vocab_size=10000, embedding_size=256, hidden_size=256, lstm_cells=1, lstm_dropout=0.):
         super(Decoder, self).__init__()
 
         self.vocab_size  = vocab_size
         self.embed_size  = embedding_size
         self.hidden_size = hidden_size
+        self.num_layers = lstm_cells
 
         self.embed  = Embedding(self.vocab_size, self.embed_size)
         self.lstm   = LSTM(input_size=self.embed_size, hidden_size=self.hidden_size, num_layers=lstm_cells, batch_first=True, dropout=lstm_dropout)
         self.fc1    = Linear(self.hidden_size, self.vocab_size)
         self.hidden_state = Linear(self.embed_size, self.hidden_size)
         self.cell_state = Linear(self.embed_size, self.hidden_size)
-
-    def init_hidden_state(self, features):
-        hidden = self.hidden_state(features)
-        cell = self.cell_state(features)
-        return hidden, cell
+        
+        self.relu = ReLU(inplace=True)
+        self.dropout = Dropout(0.3)
+    
+    def init_hidden(self, features):
+        hidden = self.relu(self.hidden_state(features)).unsqueeze(0)
+        hidden = torch.cat((hidden, )*self.num_layers, dim=0)
+        cell = self.relu(self.cell_state(features)).unsqueeze(0)
+        cell = torch.cat((cell, )*self.num_layers, dim=0)
+        return (hidden, cell)
 
     def forward(self, features, caption):
-        hidden, cell = self.init_hidden_state(features)
-        embeddings = self.embed(caption)
+        hidden = self.init_hidden(features)
+        embeddings = self.dropout(self.embed(caption))
         embeddings = torch.cat((features.unsqueeze(1), embeddings), dim=1)
-        output, _ = self.lstm(embeddings, (hidden, cell))
-        outputs = self.fc1(output)
+        outputs, hidden = self.lstm(embeddings, hidden)
+        outputs = self.fc1(outputs)
 
-        return outputs
+        return outputs, hidden
     
     def predict(self, features, length):
         # Find caption word by word using encoded features and greedy aproach
-        hidden = self.init_hidden_state()
+        hidden = self.init_hidden(features)
         predicted_tokens = []
         for i in range(length):
             # features = (batch_size, 1, embedding_size)        
@@ -176,7 +182,7 @@ class Model(Module):
         image, caption = data['image'].to(self.device), data['caption'].to(self.device)
 
         img_features      = self.encoder(image)
-        caption_predicted = self.decoder(img_features, caption[:, :-1])
+        caption_predicted, _ = self.decoder(img_features, caption[:, :-1])
 
         return caption_predicted
     
@@ -196,5 +202,19 @@ if __name__ == '__main__':
     output = d(torch.ones(1, 12), torch.ones(1, 39).long())
     print(output.shape) """
 
-    e = Encoder(backbone='resnet50', embedding_size=128, freeze_layers=False)
-    print(e)
+    # d = Decoder(20, 10, 12, 1)
+    # print(d.fc1.weight[0])
+    
+    # loss = BCELoss()
+    
+    # o = torch.optim.Adam(d.parameters(), lr=0.001)
+    # for i in range(100):
+    #     features = torch.ones(1, 10)
+    #     captions = torch.ones(1, 39)
+    #     output, hidden = d(features, captions.long())
+    #     l = loss(torch.nn.functional.softmax(output), torch.ones_like(output)*1000)
+    #     o.zero_grad()
+    #     l.backward()
+    #     o.step()
+    # print(d.fc1.weight[0])
+    # print(d)
