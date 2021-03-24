@@ -5,8 +5,8 @@
 - [x] Build Training Loop
 - [x] Clean data shapes
 - [ ] Small Stuff
-  - [ ] Order Dict by frequency
-- [ ] Teacher Forcer
+  - [x] Order Dict by frequency
+- [x] Teacher Forcer
 - [ ] Bleu Score
 - [ ] Beam Search
 - [ ] Image Augmentation
