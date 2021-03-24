@@ -113,7 +113,7 @@ class Decoder(Module):
         predicted_tokens = []
         for i in range(length):
             # features = (batch_size, 1, embedding_size)        
-            outputs, hidden = self.lstm(features, hidden)                           # outputs = (batch_size, 1, hidden_size)
+            outputs, hidden = self.lstm(features)                           # outputs = (batch_size, 1, hidden_size)
             outputs = self.fc1(outputs.squeeze(1))                                  # outputs = (batch_size, vocab_size)
             predicted_token_i = outputs.max(1)[1]                                   # predicted_token_i = (batchsize)
             predicted_tokens.append(predicted_token_i)
