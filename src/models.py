@@ -84,27 +84,28 @@ class Decoder(Module):
         self.embed  = Embedding(self.vocab_size, self.embed_size)
         self.lstm   = LSTM(input_size=self.embed_size, hidden_size=self.hidden_size, num_layers=lstm_cells, batch_first=True, dropout=lstm_dropout)
         self.fc1    = Linear(self.hidden_size, self.vocab_size)
-        self.hidden_state = Linear(self.embed_size, self.hidden_size)
-        self.cell_state = Linear(self.embed_size, self.hidden_size)
+        # self.hidden_state = Linear(self.embed_size, self.hidden_size)
+        # self.cell_state = Linear(self.embed_size, self.hidden_size)
         
         self.relu = ReLU(inplace=True)
         self.dropout = Dropout(0.3)
     
     def init_hidden(self, features):
-        hidden = self.relu(self.hidden_state(features)).unsqueeze(0)
-        hidden = torch.cat((hidden, )*self.num_layers, dim=0)
-        cell = self.relu(self.cell_state(features)).unsqueeze(0)
-        cell = torch.cat((cell, )*self.num_layers, dim=0)
-        return (hidden, cell)
+        # hidden = self.relu(self.hidden_state(features)).unsqueeze(0)
+        # hidden = torch.cat((hidden, )*self.num_layers, dim=0)
+        # cell = self.relu(self.cell_state(features)).unsqueeze(0)
+        # cell = torch.cat((cell, )*self.num_layers, dim=0)
+        # return (hidden, cell)
+        return None
 
     def forward(self, features, caption):
         hidden = self.init_hidden(features)
         embeddings = self.dropout(self.embed(caption))
         embeddings = torch.cat((features.unsqueeze(1), embeddings), dim=1)
-        outputs, hidden = self.lstm(embeddings, hidden)
+        outputs, _ = self.lstm(embeddings, hidden)
         outputs = self.fc1(outputs)
 
-        return outputs, hidden
+        return outputs
     
     def predict(self, features, length):
         # Find caption word by word using encoded features and greedy aproach
@@ -182,7 +183,7 @@ class Model(Module):
         image, caption = data['image'].to(self.device), data['caption'].to(self.device)
 
         img_features      = self.encoder(image)
-        caption_predicted, _ = self.decoder(img_features, caption[:, :-1])
+        caption_predicted = self.decoder(img_features, caption[:, :-1])
 
         return caption_predicted
     
