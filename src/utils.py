@@ -1,3 +1,4 @@
+from collections import Counter
 import os
 import spacy
 import json
@@ -22,31 +23,29 @@ class VocabBuilder:
         self.MIN_COUNT  = min_count
         self.json_path  = os.path.abspath(json_path)
 
-        self.json_dict['<PAD>']   = PAD_token
-        self.json_dict['<START>'] = SOS_token
-        self.json_dict['<END>']   = EOS_token
-        self.json_dict['<UNK>']   = UNK_token
+        
 
-    def add_to_vocab(self, caption):
-        caption = [self.add_token(token.text.lower()) for token in sp.tokenizer(caption) if not token.is_punct]
+    def add_to_vocab(self, captions):
+        count = Counter(captions)
+        sorted_count = count.most_common(len(captions))
 
-        if len(caption) > self.MAX_LEN:
-            self.MAX_LEN = len(self.caption)
+        json_list = [('<PAD>', PAD_token), ('<START>', SOS_token), ('<END>', EOS_token), ('<UNK>', UNK_token)]
+        json_list.extend([(word, index + 4) for index, (word, freq) in enumerate(sorted_count) if freq >= self.MIN_COUNT])
+        self.json_dict = dict(json_list)
 
-        return caption
 
-    def add_token(self, token):
-        if token not in self.word2index:
-            self.word2index[token] = self.num_words
-            self.word_count[token] = 1
-            self.num_words += 1
-        else:
-            self.word_count[token] += 1
+    # def add_token(self, token):
+    #     if token not in self.word2index:
+    #         self.word2index[token] = self.num_words
+    #         self.word_count[token] = 1
+    #         self.num_words += 1
+    #     else:
+    #         self.word_count[token] += 1
 
-        if self.word_count[token] >= self.MIN_COUNT:
-            self.json_dict[token] = self.word2index[token]
+    #     if self.word_count[token] >= self.MIN_COUNT:
+    #         self.json_dict[token] = self.word2index[token]
 
-        return token
+    #     return token
 
     def store_json(self):
         with open(self.json_path, "w") as outfile:
@@ -65,7 +64,7 @@ class Vocab:
             with open(self.vocab_path, 'r') as f:
                 self.word2index = json.load(f)
                 self.index2word = dict(zip(self.word2index.values(), self.word2index.keys()))
-                self.MAX_INDEX = max(self.word2index.values())
+                self.MAX_INDEX = max(self.word2index.values()) + 1
         else:
             print('File does not exist.')
 
