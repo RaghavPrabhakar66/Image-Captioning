@@ -28,6 +28,9 @@ class Encoder(Module):
         else:
             print('Please choose a valid backbone.')
             exit()
+        
+        self.relu = ReLU()
+        self.dropout = Dropout(0.5)
 
     # Backbone Creation: Load weights, freeze layers, replace classifier heads with dense layers
     def vgg16(self):
@@ -69,6 +72,7 @@ class Encoder(Module):
     # Foward pass
     def forward(self, input):
         x = self.base_model(input)
+        x = self.dropout(self.relu(x))
 
         return x
 class Decoder(Module):
@@ -87,8 +91,8 @@ class Decoder(Module):
         # self.hidden_state = Linear(self.embed_size, self.hidden_size)
         # self.cell_state = Linear(self.embed_size, self.hidden_size)
         
-        self.relu = ReLU(inplace=True)
-        self.dropout = Dropout(0.3)
+        # self.relu = ReLU()
+        self.dropout = Dropout(0.5)
     
     def init_hidden(self, features):
         # hidden = self.relu(self.hidden_state(features)).unsqueeze(0)
@@ -102,7 +106,7 @@ class Decoder(Module):
         hidden = self.init_hidden(features)
         embeddings = self.dropout(self.embed(caption))
         embeddings = torch.cat((features.unsqueeze(1), embeddings), dim=1)
-        outputs, _ = self.lstm(embeddings, hidden)
+        outputs, _ = self.lstm(embeddings)
         outputs = self.fc1(outputs)
 
         return outputs
@@ -113,7 +117,7 @@ class Decoder(Module):
         predicted_tokens = []
         for i in range(length):
             # features = (batch_size, 1, embedding_size)        
-            outputs, hidden = self.lstm(features)                           # outputs = (batch_size, 1, hidden_size)
+            outputs, hidden = self.lstm(features, hidden)                           # outputs = (batch_size, 1, hidden_size)
             outputs = self.fc1(outputs.squeeze(1))                                  # outputs = (batch_size, vocab_size)
             predicted_token_i = outputs.max(1)[1]                                   # predicted_token_i = (batchsize)
             predicted_tokens.append(predicted_token_i)
