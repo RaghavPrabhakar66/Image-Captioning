@@ -48,7 +48,7 @@ class Vocab:
             with open(self.vocab_path, 'r') as f:
                 self.word2index = json.load(f)
                 self.index2word = dict(zip(self.word2index.values(), self.word2index.keys()))
-                self.MAX_INDEX = max(self.word2index.values())
+                self.MAX_INDEX = max(self.word2index.values()) + 1
         else:
             print('File does not exist.')
 
