@@ -37,7 +37,7 @@ def main(create_vocab = False, process_captions = False, file_path = os.path.abs
             processed.append(new_line)
         
         cap_file = pd.DataFrame().from_records(processed)
-        cap_file.to_csv('data/processed  .csv', header=False, index=False)
+        cap_file.to_csv('data/processed.csv', header=False, index=False)
 
 if __name__=='__main__':
     main(

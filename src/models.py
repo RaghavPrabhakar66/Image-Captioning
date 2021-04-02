@@ -103,7 +103,6 @@ class Decoder(Module):
         return None
 
     def forward(self, features, caption):
-        hidden = self.init_hidden(features)
         embeddings = self.dropout(self.embed(caption))
         embeddings = torch.cat((features.unsqueeze(1), embeddings), dim=1)
         outputs, _ = self.lstm(embeddings)

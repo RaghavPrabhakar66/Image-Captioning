@@ -23,8 +23,6 @@ class VocabBuilder:
         self.MIN_COUNT  = min_count
         self.json_path  = os.path.abspath(json_path)
 
-        
-
     def add_to_vocab(self, captions):
         count = Counter(captions)
         sorted_count = count.most_common(len(captions))
@@ -32,20 +30,6 @@ class VocabBuilder:
         json_list = [('<PAD>', PAD_token), ('<START>', SOS_token), ('<END>', EOS_token), ('<UNK>', UNK_token)]
         json_list.extend([(word, index + 4) for index, (word, freq) in enumerate(sorted_count) if freq >= self.MIN_COUNT])
         self.json_dict = dict(json_list)
-
-
-    # def add_token(self, token):
-    #     if token not in self.word2index:
-    #         self.word2index[token] = self.num_words
-    #         self.word_count[token] = 1
-    #         self.num_words += 1
-    #     else:
-    #         self.word_count[token] += 1
-
-    #     if self.word_count[token] >= self.MIN_COUNT:
-    #         self.json_dict[token] = self.word2index[token]
-
-    #     return token
 
     def store_json(self):
         with open(self.json_path, "w") as outfile:
@@ -64,7 +48,7 @@ class Vocab:
             with open(self.vocab_path, 'r') as f:
                 self.word2index = json.load(f)
                 self.index2word = dict(zip(self.word2index.values(), self.word2index.keys()))
-                self.MAX_INDEX = max(self.word2index.values()) + 1
+                self.MAX_INDEX = max(self.word2index.values())
         else:
             print('File does not exist.')
 
