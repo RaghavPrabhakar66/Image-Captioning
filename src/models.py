@@ -62,7 +62,7 @@ class Encoder(Module):
   
 
     def inception(self):
-        model = models.inception_v3(pretrained=True)
+        model = models.inception_v3(pretrained=True, aux_logits=False)
         if self.freeze_layers:
             for parameter in model.parameters():
                 parameter.requires_grad = False
