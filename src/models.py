@@ -68,6 +68,7 @@ class Encoder(Module):
                 parameter.requires_grad = False
         
         model.fc = Linear(model.fc.in_features, self.embedding_size)
+        return model
 
     # Foward pass
     def forward(self, input):
@@ -121,6 +122,8 @@ class Decoder(Module):
             predicted_token_i = outputs.max(1)[1]                                   # predicted_token_i = (batchsize)
             predicted_tokens.append(predicted_token_i)
             features = self.embed(predicted_token_i).unsqueeze(1)                   # features = (batch_size, 1, embedding_size)
+            if predicted_token_i == 2:
+                break
         return torch.stack(predicted_tokens, 1)
 
     # # Find caption using beam search for better performance
@@ -201,7 +204,11 @@ class Model(Module):
             #     predicted_tokens = self.decoder.beam_predict(features.unsqueeze(1), caption_length, beam)
             return predicted_tokens
 
-if __name__ == '__main__':
+
+
+
+
+# if __name__ == '__main__':
     """ d = Decoder(8, 12, 16, 1)
     output = d(torch.ones(1, 12), torch.ones(1, 39).long())
     print(output.shape) """
