@@ -122,7 +122,7 @@ class Decoder(Module):
             predicted_token_i = outputs.max(1)[1]                                   # predicted_token_i = (batchsize)
             predicted_tokens.append(predicted_token_i)
             features = self.embed(predicted_token_i).unsqueeze(1)                   # features = (batch_size, 1, embedding_size)
-            if predicted_token_i == 2:
+            if predicted_token_i.item() == 2:
                 break
         return torch.stack(predicted_tokens, 1)
 
