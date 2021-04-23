@@ -1,12 +1,10 @@
 from collections import Counter
+from string import punctuation
 import os
-import spacy
 import json
 import matplotlib.pyplot as plt
 import discord
 from discord import Webhook, RequestsWebhookAdapter
-
-sp = spacy.load("en_core_web_sm")  # load english core
 
 PAD_token = 0   # Used for padding short sentences
 SOS_token = 1   # Start-of-sentence token
@@ -14,46 +12,42 @@ EOS_token = 2   # End-of-sentence token
 UNK_token = 3   # Unkown word token
 
 class VocabBuilder:
-    def __init__(self, min_count=None, json_path=None):
-        self.word_count = {}
-        self.word2index = {}
-        self.num_words  = 4
-        self.json_dict  = {}
-        self.MAX_LEN    = 37
+    def __init__(self, min_count=1, json_path=None):
         self.MIN_COUNT  = min_count
         self.json_path  = os.path.abspath(json_path)
 
-    def add_to_vocab(self, captions):
-        count = Counter(captions)
-        sorted_count = count.most_common(len(captions))
+    def generate_vocab(self, words, maxlen):
+        count = Counter(words)
+        sorted_count = count.most_common(len(words))
 
         json_list = [('<PAD>', PAD_token), ('<START>', SOS_token), ('<END>', EOS_token), ('<UNK>', UNK_token)]
         json_list.extend([(word, index + 4) for index, (word, freq) in enumerate(sorted_count) if freq >= self.MIN_COUNT])
-        self.json_dict = dict(json_list)
+        json_dict = dict(json_list)
 
-    def store_json(self):
         with open(self.json_path, "w") as outfile:
-            json.dump(self.json_dict, outfile, indent=4)
+            json.dump({'vocab_dict': json_dict, 'maxlen': maxlen+2}, outfile, indent=4)
 
 class Vocab:
-    def __init__(self):
+    def __init__(self, file):
         self.word2index = {}
         self.index2word = {}
-        self.json_dict  = {}
-        self.MAX_LEN    = 37 + 2
+        self.MAX_LEN    = 0
         self.MAX_INDEX  = 0
-        self.vocab_path  = os.path.abspath("data/vocab.json")
+        self.vocab_path  = os.path.abspath(file)
 
         if os.path.exists(self.vocab_path):
             with open(self.vocab_path, 'r') as f:
-                self.word2index = json.load(f)
+                vocab_data = json.load(f)
+                self.word2index = vocab_data['vocab_dict']
                 self.index2word = dict(zip(self.word2index.values(), self.word2index.keys()))
+                self.MAX_LEN = vocab_data['maxlen']
                 self.MAX_INDEX = max(self.word2index.values()) + 1
         else:
-            print('File does not exist.')
+            print('No file provided to vocab')
 
     def get_word_embedding(self, caption):
-        caption = [token.text.lower() for token in sp.tokenizer(caption) if not token.is_punct]
+        # caption = [token.text.lower() for token in sp.tokenizer(caption) if not token.is_punct]
+        caption = caption.translate({ord(i): '' for i in punctuation}).lower().split()
         
         final_caption = []
         final_caption.append(self.word2index['<START>'])
@@ -69,7 +63,12 @@ class Vocab:
 
         if diff > 0:
             final_caption.extend([self.word2index['<PAD>'] for i in range(diff)])
-        assert len(final_caption) == self.MAX_LEN
+        try:
+            assert len(final_caption) == self.MAX_LEN
+        except:
+            print('\nLength was not correct:', len(final_caption))
+            raise AssertionError
+
         return final_caption
 
     def get_word_token(self, word_embedding):
